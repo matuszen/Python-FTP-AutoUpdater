@@ -1,6 +1,6 @@
 from datetime import datetime
-from ftplib import FTP
-from os import listdir, chdir, getcwd
+from ftplib import FTP, FTP_TLS
+from os import listdir, chdir
 from pathlib import Path
 import numpy as np
 
@@ -58,8 +58,16 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
 
     try:
         log(f'Server: {server}')
-        ftp = FTP(server)
+        if ssh == 'True':
+            ftp = FTP_TLS(server)
+            ftp.auth()
+            log('Protocole: SFTP')
+            log(f'SSL version: {ftp.ssl_version}')
+        else:
+            ftp = FTP(server)
+            log('Protocole: FTP')
         ftp.encoding = 'utf-8'
+        log('Encoding: UTF-8')
     except Exception as e:
         log('Server connection failed')
         log(e)

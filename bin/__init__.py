@@ -18,7 +18,7 @@ def main():
     destPath = data[6].split('=')[1].strip()
     mainDir = data[5].split('=')[1].strip().split('\\')[-1]
 
-    ftp = conn(server, login, passwd, ssh = bool(sshFTP))
+    ftp = conn(server, login, passwd, ssh = sshFTP)
 
     ftp.cwd(destPath)
 
