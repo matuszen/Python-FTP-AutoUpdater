@@ -16,6 +16,8 @@ def main():
     passwd = data[4].split('=')[1].strip()
     originPath = Path(data[5].split('=')[1].strip())
     destPath = data[6].split('=')[1].strip()
+    uploadOnly = data[7].split('=')[1].strip()
+    deleteOnly = data[8].split('=')[1].strip()
     mainDir = data[5].split('=')[1].strip().split('\\')[-1]
 
     ftp = conn(server, login, passwd, ssh = sshFTP)
@@ -27,23 +29,30 @@ def main():
     except:
         pass
 
-    chdir(originPath)
-    ftp.cwd(f'{destPath}/{mainDir}')
+    if uploadOnly == 'False':
 
-    try:
-        ftp = checkFileStructure(ftp, mainDir)
-    except Exception as e:
-        log(e)
-    
-    chdir(originPath)
-    ftp.cwd(f'{destPath}/{mainDir}')
+        chdir(originPath)
+        ftp.cwd(f'{destPath}/{mainDir}')
 
-    try:
-        ftp = createFileStructure(ftp)
-    except Exception as e:
-        log(e)
-    else:
-        log('Transfer completed. No problems found')
+        try:
+            ftp = checkFileStructure(ftp, mainDir)
+        except Exception as e:
+            log(e)
+        else:
+            log('Delete completed. No problems found')
+
+    if deleteOnly == 'False':
+
+        chdir(originPath)
+        ftp.cwd(f'{destPath}/{mainDir}')
+
+        try:
+            ftp = createFileStructure(ftp)
+        except Exception as e:
+            log(e)
+        else:
+            log('Transfer completed. No problems found')
+
 
     ftp.quit()
 

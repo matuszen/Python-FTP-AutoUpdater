@@ -2,7 +2,7 @@ from utilitiesFunctions import *
 
 def createFileStructure(ftp: FTP) -> FTP:
 
-    currentDir = analyzeDirectory(listdir(Path.cwd()))
+    currentDir = analyzeDirectoryOnHost(listdir(Path.cwd()))
 
     ftp = createDirectory(ftp, currentDir)
 
@@ -65,3 +65,35 @@ def uploadFiles(ftp: FTP, files: list) -> FTP:
             log(f'Upload {file}')
     
     return ftp
+
+
+def analyzeDirectoryOnHost(dirElements: list) -> tuple:
+    """Analyzes indicated location, divides into folders and files, ignores git files
+
+    Parameters
+    ----------
+    directory : list
+        elements in given location
+
+    Returns
+    -------
+    tuple
+        example: ([folders], [files])
+    """
+
+    folders = []
+    files = []
+
+    for element in dirElements:
+
+        if element == '.git' or element == '.gitignore' or element == 'LICENSE' or element == '.' or element == '..' or element == '__pycache__':
+            continue
+            
+        elementPath = Path(f'{Path.cwd()}\{element}')
+
+        if elementPath.is_dir():
+            folders.append(element)
+        elif elementPath.is_file():
+            files.append(element)
+    
+    return (folders, files)

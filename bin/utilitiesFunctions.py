@@ -88,38 +88,3 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
         log(ftp.getwelcome())
     
     return ftp
-
-
-def analyzeDirectory(dirElements: list) -> tuple:
-    """Analyzes indicated location, divides into folders and files, ignores git files
-
-    Parameters
-    ----------
-    directory : list
-        elements in given location
-
-    Returns
-    -------
-    tuple
-        example: ([folders], [files])
-    """
-
-    folders = []
-    files = []
-
-    for element in dirElements:
-
-        if element == '.git' or element == '.gitignore' or element == 'LICENSE' or element == '.' or element == '..':
-            continue
-
-        for char in element:
-            if char == '.':
-                break
-
-        else:
-            folders.append(element)
-            continue
-
-        files.append(element)
-    
-    return (folders, files)
