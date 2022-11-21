@@ -3,7 +3,7 @@ from globals import currentPath
 
 def main():
     
-    with open('bin/config.ini', 'r') as file:
+    with open('config.ini', 'r') as file:
         data = file.readlines()
         file.close()
 
@@ -13,7 +13,7 @@ def main():
     login = data[3].split('=')[1].strip()
     passwd = data[4].split('=')[1].strip()
     originPath = data[5].split('=')[1].strip()
-    desinationPath = data[6].split('=')[1].strip() # '/home/user/Rover/Desktop/Autonomy'
+    desinationPath = data[6].split('=')[1].strip()
 
     ftp = conn(server, login, passwd, ssh = bool(sshFTP))
 
