@@ -10,17 +10,17 @@ def main():
         file.close()
 
     server = data[0].split('=')[1].strip()
-    sshFTP = data[1].split('=')[1].strip()
-    port = data[2].split('=')[0].strip()
+    useTLS = data[1].split('=')[1].strip()
+    port = data[2].split('=')[1].strip()
     login = data[3].split('=')[1].strip()
     passwd = data[4].split('=')[1].strip()
     originPath = Path(data[5].split('=')[1].strip())
+    mainDir = data[5].split('=')[1].strip().split('\\')[-1]
     destPath = data[6].split('=')[1].strip()
     uploadOnly = data[7].split('=')[1].strip()
     deleteOnly = data[8].split('=')[1].strip()
-    mainDir = data[5].split('=')[1].strip().split('\\')[-1]
 
-    ftp = conn(server, login, passwd, ssh = sshFTP)
+    ftp = conn(server, login, passwd, port, tls = useTLS)
 
     ftp.cwd(destPath)
 

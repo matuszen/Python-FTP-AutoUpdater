@@ -22,7 +22,7 @@ def log(messege: str, showHour: bool = True) -> None:
         print(messege)
 
 
-def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
+def conn(server: str, login: str, passwd: str, port:int = 'default', tls: bool = False) -> FTP:
     """Supports connection via FTP protocole
 
     Parameters
@@ -44,6 +44,11 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
 
     passwdHash = ''
 
+    try:
+        port = int(port)
+    except:
+        pass
+
     for char in range(len(passwd)):
         passwdHash += "*"
 
@@ -55,25 +60,43 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
         user = f'{login}@{server}'
 
     log('Starting connection')
+    log(f'Server: {server}')
 
-    try:
-        log(f'Server: {server}')
-        if ssh == 'True':
-            ftp = FTP_TLS(server)
-            ftp.auth()
-            log('Protocole: SFTP')
-            log(f'SSL version: {ftp.ssl_version}')
+    if tls == 'True':
+        try:
+            if port != 'default':
+                    ftp = FTP_TLS()
+                    ftp.connect(server, port)
+            else:
+                ftp = FTP_TLS(server)
+        except Exception as e:
+            log(e)
+            return
         else:
-            ftp = FTP(server)
-            log('Protocole: FTP')
-        ftp.encoding = 'utf-8'
-        log('Encoding: UTF-8')
-    except Exception as e:
-        log('Server connection failed')
-        log(e)
-        return None
+            log(f'Succesfully connected to {server}')
+
+        ftp.auth()
+        log('Protocole: FTP (TLS support)')
+        log(f'SSL version: {ftp.ssl_version}')
+
     else:
-        log(f'Succesfully connected to {server}')
+        try:
+            if port != 'default':
+                ftp = FTP()
+                ftp.connect(server, port)
+            else:
+                ftp = FTP(server)
+        except Exception as e:
+            log(e)
+            return
+        else:
+            log(f'Succesfully connected to {server}')
+
+        log('Protocole: FTP')
+
+    log(f'Port: {ftp.port}')
+    ftp.encoding = 'utf-8'
+    log('Encoding: UTF-8')
 
     try:
         log(f'User: {user}')
