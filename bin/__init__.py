@@ -12,33 +12,32 @@ def main():
     port = data[2].split('=')[0].strip()
     login = data[3].split('=')[1].strip()
     passwd = data[4].split('=')[1].strip()
-    originPath = data[5].split('=')[1].strip()
+    originPath = Path(data[5].split('=')[1].strip())
     desinationPath = data[6].split('=')[1].strip()
 
     ftp = conn(server, login, passwd, ssh = bool(sshFTP))
 
     ftp.cwd(desinationPath)
 
-    # try:
-    #     ftp.rmd('Autonomy')
-    # except:
-    #     pass
-    # else:
-    #     ftp.mkd('Autonomy')
+    try:
+        ftp.rmd('Autonomy')
+    except:
+        pass
+    else:
+        ftp.mkd('Autonomy')
 
-    ftp.mkd('Autonomy')
+    chdir(originPath)
 
     desinationPath = desinationPath + '/Autonomy'
 
     ftp.cwd(desinationPath)
-
-    globals = currentPath()
-    globals.origin = originPath
-    globals.dest = desinationPath
-
-    ftp = createFileStructure(ftp)
-
-    print(ftp.dir())
+    
+    try:
+        ftp = createFileStructure(ftp, originPath, desinationPath)
+    except Exception as e:
+        log(e)
+    else:
+        log('Transfer completed. No problems found')
 
     ftp.quit()
 

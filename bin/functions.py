@@ -1,7 +1,7 @@
 from datetime import datetime
 from ftplib import FTP
-from os import listdir
-import os.path 
+from os import listdir, chdir, getcwd
+from pathlib import Path
 import numpy as np
 from globals import currentPath
 
@@ -83,48 +83,55 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
     return ftp
 
 
-def createFileStructure(ftp: FTP) -> FTP:
-
-    globals = currentPath()
+def createFileStructure(ftp: FTP, originPath: Path, destPath: str) -> FTP:
     
-    try:
-        originPathList = listdir(globals.origin)
-    except NotADirectoryError:
-        newPath = globals.dest.split('/')[:-1]
-        destPath = '/'.join(newPath)
-        newPath = globals.origin.split('/')[:-1]
-        globals.origin = '/'.join(newPath)
-        ftp.cwd(globals.dest)
-        return ftp
-        
+    originPathList = listdir(originPath)
 
     currentDirectory = analyzeDirectory(originPathList)
 
-    ftp = makeDirectory(ftp, currentDirectory, globals.origin)
-
-    log(ftp.nlst())
+    ftp = makeDirectory(ftp, currentDirectory)
 
     if len(currentDirectory[0]) == 0:
-        newPath = globals.dest.split('/')[:-1]
-        destPath = '/'.join(newPath)
-        newPath = globals.origin.split('/')[:-1]
-        globals.origin = '/'.join(newPath)
-        ftp.cwd(globals.dest)
+
+        ftp = upDirection(ftp, originPath, destPath)
+
         return ftp
 
-    for dir in currentDirectory[0]:
-        ftp.cwd(dir)
-        globals.dest = ftp.pwd()
-        log(globals.origin)
-        log(f'Go to {globals.dest}')
-        ftp = createFileStructure(ftp)
+    else:
+        for i in range(len(currentDirectory[0])):
+
+            dir = currentDirectory[0][i]
+
+            while not Path.exists(Path(f'{Path.cwd()}\{dir}')):
+                ftp = upDirection(ftp, originPath, destPath)
+
+            ftp.cwd(dir)
+            destPath = ftp.pwd()
+            originPath = Path(f'{Path.cwd()}\{dir}')
+            chdir(originPath)
+
+            log(f'Change direction to {originPath}')
+            log(f'Upload to {destPath}')
+
+            ftp = createFileStructure(ftp, originPath, destPath)
 
     return ftp
 
 
-def makeDirectory(ftp: FTP, content: tuple, originPath: str) -> FTP:
+def upDirection(ftp: FTP, originPath: Path, destPath: str) -> FTP:
+    originPath = Path(originPath.parent)
+    chdir(originPath)
+
+    newPath = destPath.split('/')[:-1]
+    destPath = '/'.join(newPath)
+    ftp.cwd(destPath)
+
+    return ftp
+
+
+def makeDirectory(ftp: FTP, content: tuple) -> FTP:
     ftp = createFolders(ftp, content[0])
-    ftp = uploadFiles(ftp, content[1], originPath)
+    ftp = uploadFiles(ftp, content[1])
 
     return ftp
 
@@ -138,10 +145,10 @@ def createFolders(ftp: FTP, folders: list) -> FTP:
     return ftp
 
 
-def uploadFiles(ftp: FTP, files: list, originPath: str) -> FTP:
+def uploadFiles(ftp: FTP, files: list) -> FTP:
 
     for file in files:
-        with open(f'{originPath}/{file}', 'rb') as f:
+        with open(f'{Path.cwd()}\{file}', 'rb') as f:
             ftp.storbinary(f'STOR {file}', f)
             log(f'Upload {file}')
     
