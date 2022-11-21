@@ -1,5 +1,4 @@
 from functions import *
-from globals import currentPath
 
 def main():
     
@@ -13,27 +12,24 @@ def main():
     login = data[3].split('=')[1].strip()
     passwd = data[4].split('=')[1].strip()
     originPath = Path(data[5].split('=')[1].strip())
-    desinationPath = data[6].split('=')[1].strip()
+    destPath = data[6].split('=')[1].strip()
+    mainDir = data[5].split('=')[1].strip().split('\\')[-1]
 
     ftp = conn(server, login, passwd, ssh = bool(sshFTP))
 
-    ftp.cwd(desinationPath)
+    ftp.cwd(destPath)
 
     try:
-        ftp.rmd('Autonomy')
+        ftp.mkd(mainDir)
     except:
         pass
-    else:
-        ftp.mkd('Autonomy')
 
     chdir(originPath)
 
-    desinationPath = desinationPath + '/Autonomy'
-
-    ftp.cwd(desinationPath)
+    ftp.cwd(f'{ftp.pwd()}/{mainDir}')
     
     try:
-        ftp = createFileStructure(ftp, originPath, desinationPath)
+        ftp = createFileStructure(ftp)
     except Exception as e:
         log(e)
     else:

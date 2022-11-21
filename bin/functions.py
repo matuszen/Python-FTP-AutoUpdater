@@ -3,7 +3,6 @@ from ftplib import FTP
 from os import listdir, chdir, getcwd
 from pathlib import Path
 import numpy as np
-from globals import currentPath
 
 def log(messege: str, showHour: bool = True) -> None:
     """Logs messege to console
@@ -83,17 +82,15 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
     return ftp
 
 
-def createFileStructure(ftp: FTP, originPath: Path, destPath: str) -> FTP:
-    
-    originPathList = listdir(originPath)
+def createFileStructure(ftp: FTP) -> FTP:
 
-    currentDirectory = analyzeDirectory(originPathList)
+    currentDirectory = analyzeDirectory(Path.cwd())
 
     ftp = makeDirectory(ftp, currentDirectory)
 
     if len(currentDirectory[0]) == 0:
 
-        ftp = upDirection(ftp, originPath, destPath)
+        ftp = upDirection(ftp)
 
         return ftp
 
@@ -103,28 +100,25 @@ def createFileStructure(ftp: FTP, originPath: Path, destPath: str) -> FTP:
             dir = currentDirectory[0][i]
 
             while not Path.exists(Path(f'{Path.cwd()}\{dir}')):
-                ftp = upDirection(ftp, originPath, destPath)
+                ftp = upDirection(ftp)
 
             ftp.cwd(dir)
-            destPath = ftp.pwd()
             originPath = Path(f'{Path.cwd()}\{dir}')
             chdir(originPath)
 
-            log(f'Change direction to {originPath}')
-            log(f'Upload to {destPath}')
+            log(f'Change direction to {ftp.pwd()}')
 
-            ftp = createFileStructure(ftp, originPath, destPath)
+            ftp = createFileStructure(ftp)
 
     return ftp
 
 
-def upDirection(ftp: FTP, originPath: Path, destPath: str) -> FTP:
-    originPath = Path(originPath.parent)
+def upDirection(ftp: FTP) -> FTP:
+    originPath = Path(Path.cwd().parent)
     chdir(originPath)
 
-    newPath = destPath.split('/')[:-1]
-    destPath = '/'.join(newPath)
-    ftp.cwd(destPath)
+    destPath = ftp.pwd().split('/')[:-1]
+    ftp.cwd('/'.join(destPath))
 
     return ftp
 
@@ -155,7 +149,7 @@ def uploadFiles(ftp: FTP, files: list) -> FTP:
     return ftp
 
 
-def analyzeDirectory(directory: list) -> tuple:
+def analyzeDirectory(dir: list) -> tuple:
     """Analyzes indicated location, divides into folders and files, ignores git files
 
     Parameters
@@ -169,10 +163,12 @@ def analyzeDirectory(directory: list) -> tuple:
         example: ([folders], [files])
     """
 
+    dirElements = listdir(dir)
+
     folders = []
     files = []
 
-    for element in directory:
+    for element in dirElements:
 
         if element == '.git' or element == '.gitignore' or element == 'LICENSE':
             continue
