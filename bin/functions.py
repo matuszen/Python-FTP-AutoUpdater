@@ -34,7 +34,7 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
     passwd : str
         user's passord
     ssh : bool, optional
-        use SFTP protocole, secured version os FTP, by default False
+        use SFTP protocole, secured version of FTP, by default False
 
     Returns
     -------
@@ -82,22 +82,22 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
     return ftp
 
 
-def createFileStructure(ftp: FTP) -> FTP:
+def checkFileStructure(ftp: FTP) -> FTP:
 
-    currentDirectory = analyzeDirectory(Path.cwd())
+    currentDir = analyzeDirectory(Path.cwd())
 
-    ftp = makeDirectory(ftp, currentDirectory)
+    ftp = checkDirecory(ftp, currentDir)
 
-    if len(currentDirectory[0]) == 0:
+    if len(currentDir[0]) == 0:
 
         ftp = upDirection(ftp)
 
         return ftp
 
     else:
-        for i in range(len(currentDirectory[0])):
+        for i in range(len(currentDir[0])):
 
-            dir = currentDirectory[0][i]
+            dir = currentDir[0][i]
 
             while not Path.exists(Path(f'{Path.cwd()}\{dir}')):
                 ftp = upDirection(ftp)
@@ -108,7 +108,7 @@ def createFileStructure(ftp: FTP) -> FTP:
 
             log(f'Change direction to {ftp.pwd()}')
 
-            ftp = createFileStructure(ftp)
+            ftp = checkFileStructure(ftp)
 
     return ftp
 
@@ -123,14 +123,14 @@ def upDirection(ftp: FTP) -> FTP:
     return ftp
 
 
-def makeDirectory(ftp: FTP, content: tuple) -> FTP:
-    ftp = createFolders(ftp, content[0])
-    ftp = uploadFiles(ftp, content[1])
+def checkDirecory(ftp: FTP, content: tuple) -> FTP:
+    ftp = updateFolders(ftp, content[0])
+    ftp = updateFiles(ftp, content[1])
 
     return ftp
 
 
-def createFolders(ftp: FTP, folders: list) -> FTP:
+def updateFolders(ftp: FTP, folders: list) -> FTP:
 
     for folder in folders:
         ftp.mkd(folder)
@@ -139,7 +139,7 @@ def createFolders(ftp: FTP, folders: list) -> FTP:
     return ftp
 
 
-def uploadFiles(ftp: FTP, files: list) -> FTP:
+def updateFiles(ftp: FTP, files: list) -> FTP:
 
     for file in files:
         with open(f'{Path.cwd()}\{file}', 'rb') as f:
