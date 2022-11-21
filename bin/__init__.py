@@ -29,7 +29,7 @@ def main():
     ftp.cwd(f'{ftp.pwd()}/{mainDir}')
     
     try:
-        ftp = checkFileStructure(ftp)
+        ftp = createFileStructure(ftp)
     except Exception as e:
         log(e)
     else:
