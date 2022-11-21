@@ -82,11 +82,11 @@ def conn(server: str, login: str, passwd: str, ssh: bool = False) -> FTP:
     return ftp
 
 
-def checkFileStructure(ftp: FTP) -> FTP:
+def createFileStructure(ftp: FTP) -> FTP:
 
     currentDir = analyzeDirectory(Path.cwd())
 
-    ftp = checkDirecory(ftp, currentDir)
+    ftp = createDirectory(ftp, currentDir)
 
     if len(currentDir[0]) == 0:
 
@@ -108,7 +108,7 @@ def checkFileStructure(ftp: FTP) -> FTP:
 
             log(f'Change direction to {ftp.pwd()}')
 
-            ftp = checkFileStructure(ftp)
+            ftp = createFileStructure(ftp)
 
     return ftp
 
@@ -123,23 +123,23 @@ def upDirection(ftp: FTP) -> FTP:
     return ftp
 
 
-def checkDirecory(ftp: FTP, content: tuple) -> FTP:
-    ftp = updateFolders(ftp, content[0])
-    ftp = updateFiles(ftp, content[1])
+def createDirectory(ftp: FTP, content: tuple) -> FTP:
+    ftp = createFolders(ftp, content[0])
+    ftp = uploadFiles(ftp, content[1])
 
     return ftp
 
 
-def updateFolders(ftp: FTP, folders: list) -> FTP:
+def createFolders(ftp: FTP, folders: list) -> FTP:
 
     for folder in folders:
         ftp.mkd(folder)
         log(f'Create {folder} folder')
-    
+
     return ftp
 
 
-def updateFiles(ftp: FTP, files: list) -> FTP:
+def uploadFiles(ftp: FTP, files: list) -> FTP:
 
     for file in files:
         with open(f'{Path.cwd()}\{file}', 'rb') as f:
