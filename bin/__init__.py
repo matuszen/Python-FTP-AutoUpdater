@@ -22,15 +22,22 @@ def main():
 
     ftp.cwd(destPath)
 
-    try:
+    try: 
         ftp.mkd(mainDir)
     except:
         pass
 
     chdir(originPath)
+    ftp.cwd(f'{destPath}/{mainDir}')
 
-    ftp.cwd(f'{ftp.pwd()}/{mainDir}')
+    try:
+        ftp = checkFileStructure(ftp, mainDir)
+    except Exception as e:
+        log(e)
     
+    chdir(originPath)
+    ftp.cwd(f'{destPath}/{mainDir}')
+
     try:
         ftp = createFileStructure(ftp)
     except Exception as e:
