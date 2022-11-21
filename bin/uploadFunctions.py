@@ -1,6 +1,18 @@
 from utilitiesFunctions import *
 
 def createFileStructure(ftp: FTP) -> FTP:
+    """Creates file structure in current working directory
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
 
     currentDir = analyzeDirectoryOnHost(listdir(Path.cwd()))
 
@@ -32,6 +44,19 @@ def createFileStructure(ftp: FTP) -> FTP:
 
 
 def upDirection(ftp: FTP) -> FTP:
+    """Changing current working direction one level higher in file structure. Do this both on server, and on user comp
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
+
     originPath = Path(Path.cwd().parent)
     chdir(originPath)
 
@@ -42,6 +67,21 @@ def upDirection(ftp: FTP) -> FTP:
 
 
 def createDirectory(ftp: FTP, content: tuple) -> FTP:
+    """Create folders and files in current working directory on server
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+    content : tuple
+        contains listed files and dirs, ex: ([folders], [files])
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
+
     ftp = createFolders(ftp, content[0])
     ftp = uploadFiles(ftp, content[1])
 
@@ -49,6 +89,20 @@ def createDirectory(ftp: FTP, content: tuple) -> FTP:
 
 
 def createFolders(ftp: FTP, folders: list) -> FTP:
+    """Create folders in current working directory on server, which names are listed in folders param
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+    folders : list
+        contains listed dirs names 
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
 
     for folder in folders:
         ftp.mkd(folder)
@@ -58,8 +112,23 @@ def createFolders(ftp: FTP, folders: list) -> FTP:
 
 
 def uploadFiles(ftp: FTP, files: list) -> FTP:
+    """Upload files from current working directory to server, which names are listed in files param
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+    files : list
+        contains listed files names (with extensions)
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
 
     for file in files:
+
         with open(f'{Path.cwd()}\{file}', 'rb') as f:
             ftp.storbinary(f'STOR {file}', f)
             log(f'Upload {file}')
@@ -68,17 +137,17 @@ def uploadFiles(ftp: FTP, files: list) -> FTP:
 
 
 def analyzeDirectoryOnHost(dirElements: list) -> tuple:
-    """Analyzes indicated location, divides into folders and files, ignores git files
+    """Analyzes current working directory, divides into folders and files, ignores git files
 
     Parameters
     ----------
     directory : list
-        elements in given location
+        contains elements in current working directory
 
     Returns
     -------
     tuple
-        example: ([folders], [files])
+        contains listed file and folder names, example: ([folders], [files])
     """
 
     folders = []

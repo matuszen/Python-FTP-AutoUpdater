@@ -10,7 +10,7 @@ def main():
         file.close()
 
     server = data[0].split('=')[1].strip()
-    useTLS = data[1].split('=')[1].strip()
+    tls = data[1].split('=')[1].strip()
     port = data[2].split('=')[1].strip()
     login = data[3].split('=')[1].strip()
     passwd = data[4].split('=')[1].strip()
@@ -20,7 +20,7 @@ def main():
     uploadOnly = data[7].split('=')[1].strip()
     deleteOnly = data[8].split('=')[1].strip()
 
-    ftp = conn(server, login, passwd, port, tls = useTLS)
+    ftp = conn(server, login, passwd, port, tls)
 
     ftp.cwd(destPath)
 

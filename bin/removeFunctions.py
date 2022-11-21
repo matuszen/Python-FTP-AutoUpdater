@@ -1,6 +1,20 @@
 from utilitiesFunctions import *
 
 def checkFileStructure(ftp: FTP, mainDir: str) -> FTP:
+    """Searching through current working directory, to find files and delete them. After this, delete main folder
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+    mainDir : str
+        main dir in file structure, remove all elements in this folder
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
 
     currentDir = analyzeDirectoryOnServer(ftp)
 
@@ -25,6 +39,20 @@ def checkFileStructure(ftp: FTP, mainDir: str) -> FTP:
 
 
 def removeFiles(ftp: FTP, files: list) -> FTP:
+    """Remove files, in current working directory on server, which are listed in files param
+
+    Parameters
+    ----------
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
+    files : list
+        contains listed names of files (with extensions)
+
+    Returns
+    -------
+    FTP
+        the object containing the entire connection to the server. Create by ftplib
+    """
 
     for file in files:
         ftp.delete(file)
@@ -33,17 +61,17 @@ def removeFiles(ftp: FTP, files: list) -> FTP:
     return ftp
 
 def analyzeDirectoryOnServer(ftp: FTP) -> tuple:
-    """Analyzes indicated location, divides into folders and files, ignores git files
+    """Analyzes current working directory, divides into folders and files, ignores git files
 
     Parameters
     ----------
-    directory : list
-        elements in given location
+    ftp : FTP
+        the object containing the entire connection to the server. Create by ftplib
 
     Returns
     -------
     tuple
-        example: ([folders], [files])
+        contains listed file and folder names, example: ([folders], [files])
     """
 
     dirElements = ftp.nlst()

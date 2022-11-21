@@ -33,8 +33,10 @@ def conn(server: str, login: str, passwd: str, port:int = 'default', tls: bool =
         the login of the user to which to log in
     passwd : str
         user's passord
-    ssh : bool, optional
-        use SFTP protocole, secured version of FTP, by default False
+    port : int, optional
+        custom port to use in connection, if empty, use default port
+    tls : bool, optional
+        use TLS to support and secure FTP communication, by default False
 
     Returns
     -------
