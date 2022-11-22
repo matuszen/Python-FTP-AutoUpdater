@@ -44,6 +44,10 @@ def conn(server: str, login: str, passwd: str, port:int = 'default', tls: bool =
         the object containing the entire connection to the server. Create by ftplib
     """
 
+    if server == '' or login == '':
+        log('Wrong parameters')
+        return None
+
     passwdHash = ''
 
     try:
@@ -73,7 +77,7 @@ def conn(server: str, login: str, passwd: str, port:int = 'default', tls: bool =
                 ftp = FTP_TLS(server)
         except Exception as e:
             log(e)
-            return
+            return None
         else:
             log(f'Succesfully connected to {server}')
 
@@ -90,7 +94,7 @@ def conn(server: str, login: str, passwd: str, port:int = 'default', tls: bool =
                 ftp = FTP(server)
         except Exception as e:
             log(e)
-            return
+            return None
         else:
             log(f'Succesfully connected to {server}')
 

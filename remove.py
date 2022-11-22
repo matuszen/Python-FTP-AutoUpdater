@@ -1,4 +1,4 @@
-from utilitiesFunctions import *
+from utility import *
 
 def checkFileStructure(ftp: FTP, mainDir: str) -> FTP:
     """Searching through current working directory, to find files and delete them. After this, delete main folder
@@ -60,6 +60,7 @@ def removeFiles(ftp: FTP, files: list) -> FTP:
 
     return ftp
 
+
 def analyzeDirectoryOnServer(ftp: FTP) -> tuple:
     """Analyzes current working directory, divides into folders and files, ignores git files
 
@@ -74,10 +75,10 @@ def analyzeDirectoryOnServer(ftp: FTP) -> tuple:
         contains listed file and folder names, example: ([folders], [files])
     """
 
-    dirElements = ftp.nlst()
+    dirElements = np.array(ftp.nlst(), dtype = str)
 
-    folders = []
-    files = []
+    folders = np.array([], dtype = str)
+    files = np.array([], dtype = str)
 
     for element in dirElements:
 
@@ -89,9 +90,9 @@ def analyzeDirectoryOnServer(ftp: FTP) -> tuple:
                 break
 
         else:
-            folders.append(element)
+            folders = np.append(folders, element)
             continue
 
-        files.append(element)
+        files = np.append(files, element)
     
     return (folders, files)

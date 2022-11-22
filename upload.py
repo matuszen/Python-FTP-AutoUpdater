@@ -1,6 +1,6 @@
-from utilitiesFunctions import *
+from utility import *
 
-def createFileStructure(ftp: FTP) -> FTP:
+def createFileStructure(ftp: FTP, disabledElements: tuple) -> FTP:
     """Creates file structure in current working directory
 
     Parameters
@@ -14,7 +14,7 @@ def createFileStructure(ftp: FTP) -> FTP:
         the object containing the entire connection to the server. Create by ftplib
     """
 
-    currentDir = analyzeDirectoryOnHost(listdir(Path.cwd()))
+    currentDir = analyzeDirectoryOnHost(np.array(listdir(Path.cwd()), dtype = str), disabledElements)
 
     ftp = createDirectory(ftp, currentDir)
 
@@ -38,7 +38,7 @@ def createFileStructure(ftp: FTP) -> FTP:
 
             log(f'Change direction to {ftp.pwd()}')
 
-            ftp = createFileStructure(ftp)
+            ftp = createFileStructure(ftp, disabledElements)
 
     return ftp
 
@@ -136,7 +136,7 @@ def uploadFiles(ftp: FTP, files: list) -> FTP:
     return ftp
 
 
-def analyzeDirectoryOnHost(dirElements: list) -> tuple:
+def analyzeDirectoryOnHost(dirElements: list, disabledElements: tuple) -> tuple:
     """Analyzes current working directory, divides into folders and files, ignores git files
 
     Parameters
@@ -150,19 +150,21 @@ def analyzeDirectoryOnHost(dirElements: list) -> tuple:
         contains listed file and folder names, example: ([folders], [files])
     """
 
-    folders = []
-    files = []
+    folders = np.array([], dtype = str)
+    files = np.array([], dtype = str)
 
     for element in dirElements:
 
-        if element == '.git' or element == '.gitignore' or element == 'LICENSE' or element == '.' or element == '..' or element == '__pycache__':
-            continue
-            
-        elementPath = Path(f'{Path.cwd()}\{element}')
+        for exception in disabledElements:
+            if element == exception:
+                break
+        else:
+    
+            elementPath = Path(f'{Path.cwd()}\{element}')
 
-        if elementPath.is_dir():
-            folders.append(element)
-        elif elementPath.is_file():
-            files.append(element)
+            if elementPath.is_dir():
+                folders = np.append(folders, element)
+            elif elementPath.is_file():
+                files = np.append(files, element)
     
     return (folders, files)
