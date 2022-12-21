@@ -4,34 +4,36 @@ from remove import *
 
 def main():
     
-    with open('ftpModule/config.ini', 'r') as file:
+    with open('./config.ini', 'r') as file:
         data = file.readlines()
         file.close()
 
     server = data[0].split('=')[1].strip()
     login = data[1].split('=')[1].strip()
     passwd = data[2].split('=')[1].strip()
-    originPath = Path(data[3].split('=')[1].strip())
-    destPath = data[4].split('=')[1].strip()
+    port = data[3].split('=')[1].strip()
+    protocole = data[4].split('=')[1].strip()
     tls = data[5].split('=')[1].strip()
-    port = data[6].split('=')[1].strip()
-    uploadOnly = data[7].split('=')[1].strip()
-    deleteOnly = data[8].split('=')[1].strip()
-    runOnly = data[9].split('=')[1].strip()
-    isModuleInProject = data[10].split('=')[1].strip()
-    locationInProject = data[11].split('=')[1].strip()
-    disabledElements = tuple(data[12].split('=')[1].strip().split(', '))
+    ssh = data[6].split('=')[1].strip()
+    originPath = Path(data[7].split('=')[1].strip())
+    destPath = data[8].split('=')[1].strip()
+    uploadOnly = data[9].split('=')[1].strip()
+    deleteOnly = data[10].split('=')[1].strip()
+    runOnly = data[11].split('=')[1].strip()
+    isModuleInProject = data[12].split('=')[1].strip()
+    locationInProject = data[13].split('=')[1].strip()
+    disabledElements = tuple(data[14].split('=')[1].strip().split(', '))
 
-    ftp = conn(server, login, passwd, port, tls)
+    ftp = conn(server, login, passwd, protocole, port, tls)
 
     ftp.cwd(destPath)
+    chdir(originPath)
 
     if isModuleInProject == 'True':
 
         originPath = Path(f'{Path(originPath.cwd())}{locationInProject}')
-        chdir(originPath)
         
-        with open('ftpModule/config.ini', 'w') as file:
+        with open('./config.ini', 'w') as file:
             data[5] = f'sourceDirection = {Path.cwd()}\n'
             file.writelines(data)
             file.close()
