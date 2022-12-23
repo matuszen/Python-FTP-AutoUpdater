@@ -4,7 +4,7 @@ from remove import *
 
 def main():
     
-    with open('./config.ini', 'r') as file:
+    with open(Path('./config.ini'), 'r') as file:
         data = file.readlines()
         file.close()
 
@@ -21,7 +21,7 @@ def main():
     deleteOnly = data[10].split('=')[1].strip()
     runOnly = data[11].split('=')[1].strip()
     isModuleInProject = data[12].split('=')[1].strip()
-    locationInProject = data[13].split('=')[1].strip()
+    locationInProject = Path(data[13].split('=')[1].strip())
     disabledElements = tuple(data[14].split('=')[1].strip().split(', '))
 
     if atSign == 'True': atSign = True
@@ -34,10 +34,10 @@ def main():
 
     if isModuleInProject == 'True':
 
-        originPath = Path(f'{Path(originPath.cwd())}{locationInProject}')
-        
-        with open('./config.ini', 'w') as file:
-            data[5] = f'sourceDirection = {Path.cwd()}\n'
+        originPath = Path(f'{originPath.cwd()}{locationInProject}')
+
+        with open(Path(f'{originPath}/config.ini'), 'w') as file:
+            data[7] = f'sourceDirection = {Path.cwd()}\n'
             file.writelines(data)
             file.close()
     

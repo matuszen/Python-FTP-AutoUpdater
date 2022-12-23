@@ -115,7 +115,7 @@ def useFTP(server: str, login: str, passwd: str, port: int, passwdHash: str, tls
         the object containing the entire connection to the server. Create by ftplib
     """
 
-    if tls == 'True':
+    if tls:
         try:
             ftp = FTP_TLS()
             ftp.connect(server, port)
