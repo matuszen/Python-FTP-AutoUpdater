@@ -23,7 +23,7 @@ def log(messege: str, showHour: bool = True) -> None:
         print(messege)
 
 
-def conn(server: str, login: str, passwd: str, protocole: str, port: int = 'default', tls: bool = False, ssh: bool = False) -> FTP:
+def conn(server: str, login: str, passwd: str, protocole: str, port: int = 'default', tls: bool = False, ssh: bool = False, atSign: bool = True) -> FTP:
     """Starts and supports connection via FTP or SFTP protocole
 
     Parameters
@@ -54,13 +54,17 @@ def conn(server: str, login: str, passwd: str, protocole: str, port: int = 'defa
 
     for char in range(len(passwd)):
         passwdHash += "*"
+    
+    if atSign:
+        for char in range(len(login)):
+            if char == "@":
+                user = login
+                break
+        else:
+            user = f'{login}@{server}'
 
-    for char in range(len(login)):
-        if char == "@":
-            user = login
-            break
     else:
-        user = f'{login}@{server}'
+        user = login
 
     log('Starting connection')
     log(f'Server: {server}')

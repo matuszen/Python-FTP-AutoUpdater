@@ -14,7 +14,7 @@ def main():
     port = data[3].split('=')[1].strip()
     protocole = data[4].split('=')[1].strip()
     tls = data[5].split('=')[1].strip()
-    ssh = data[6].split('=')[1].strip()
+    atSign = data[6].split('=')[1].strip()
     originPath = Path(data[7].split('=')[1].strip())
     destPath = data[8].split('=')[1].strip()
     uploadOnly = data[9].split('=')[1].strip()
@@ -24,7 +24,10 @@ def main():
     locationInProject = data[13].split('=')[1].strip()
     disabledElements = tuple(data[14].split('=')[1].strip().split(', '))
 
-    ftp = conn(server, login, passwd, protocole, port, tls)
+    if atSign == 'True': atSign = True
+    elif atSign == 'False': atSign = False
+
+    ftp = conn(server, login, passwd, protocole, port, tls = tls, atSign = atSign)
 
     ftp.cwd(destPath)
     chdir(originPath)
