@@ -17,7 +17,7 @@ def log(messege: str, showHour: bool = True) -> None:
     """
 
     if showHour:
-        now =  datetime.now().strftime('%H:%M:%S')
+        now = datetime.now().strftime('%H:%M:%S')
         print(f'[{now}] {messege}')
     else:
         print(messege)
