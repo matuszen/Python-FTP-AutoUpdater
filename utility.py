@@ -1,6 +1,6 @@
 from datetime import datetime
 from ftplib import FTP, FTP_TLS
-import pysftp
+# import pysftp
 from os import listdir, chdir, getcwd
 from pathlib import Path
 import numpy as np
