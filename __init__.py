@@ -25,7 +25,7 @@ def main():
     locationInProject = Path(conf['SCRIPT SETTINGS']['locationInProject'])
     disabledElements = tuple(conf['SCRIPT SETTINGS']['disabledElements'].split(', '))
 
-    ftp = connect(host, login, password, protocole, port, tls=useTLS)
+    ftp = connect(host, login, password, protocole, port, useTLS=useTLS)
 
     chdir(sourceDirection)
 
@@ -35,10 +35,10 @@ def main():
 
         sourceDirection = Path(f'{sourceDirection.cwd()}{locationInProject}')
 
+        conf['DIRECTORIES']['sourceDirection'] = str(Path.cwd())
+
         with open(Path(f'{sourceDirection}/config.ini'), 'w') as file:
-            data[7] = f'sourceDirection = {Path.cwd()}\n'
-            file.writelines(data)
-            file.close()
+            conf.write(file)
 
     log(f'Source direction: {Path.cwd()}')
 

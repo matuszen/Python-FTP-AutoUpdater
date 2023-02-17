@@ -23,12 +23,12 @@ def log(messege: str, showHour: bool = True) -> None:
         print(messege)
 
 
-def connect(server: str, user: str, passwd: str, protocole: str, port: int | str = 'default', tls: bool = False, ssh: bool = False, atSign: bool = True) -> FTP:
+def connect(host: str, user: str, password: str, protocole: str, port: int | str = 'default', useTLS: bool = False) -> FTP:
     """Starts and supports connection via FTP protocole
 
     Parameters
     ----------
-    server : str
+    host : str
         the address of the server to which to connect
     user : str
         the login of the user to which to log in
@@ -38,47 +38,30 @@ def connect(server: str, user: str, passwd: str, protocole: str, port: int | str
         custom port to use in connection, if empty, use default port
     tls : bool, optional
         use TLS to support and secure FTP communication, by default False
-    ssh : bool, optional
-        use SSH to support and secure SFTP communication, by default False
 
     Returns
     -------
-    object
+    FTP
         the object containing the entire connection to the server"""
 
-    if server == '' or user == '':
+    if host == '':
         log('Wrong parameters')
+        raise ValueError('Please type host address in `config.ini`')
 
-    passwdHash = "*" * len(passwd)
+    passwdHash = "*" * len(password)
 
     log('Starting connection')
-    log(f'Server: {server}')
+    log(f'Host: {host}')
 
-    if protocole == 'FTP':
+    if port == 'default':
+        port = 21
+    else:
+        port = int(port)
 
-        if port == 'default':
-            port = 21
-        else:
-            port = int(port)
-
-        if tls == 'True':
-            session = useFTP(server, user, passwd, port, passwdHash, tls=True)
-        else:
-            session = useFTP(server, user, passwd, port, passwdHash, tls=False)
-
-    # elif protocole == 'SFTP':
-
-    #     if port == 'default':
-    #         port = 22
-    #     else:
-    #         port = int(port)
-
-    #     session = useSFTP(server, login, passwd, port)
-
-    return session
+    return useFTP(host, user, password, port, passwdHash, useTLS=useTLS)
 
 
-def useFTP(server: str, login: str, passwd: str, port: int, passwdHash: str, tls: bool) -> FTP:
+def useFTP(server: str, login: str, passwd: str, port: int, passwdHash: str, useTLS: bool) -> FTP:
     """Supports connection via FTP protocole
 
     Parameters
@@ -100,7 +83,7 @@ def useFTP(server: str, login: str, passwd: str, port: int, passwdHash: str, tls
         the object containing the entire connection to the server. Create by ftplib
     """
 
-    if tls:
+    if useTLS:
         try:
             ftp = FTP_TLS()
             ftp.connect(server, port)
