@@ -1,0 +1,8 @@
+name: Python-FTP-Client
+
+dependencies:
+  - python=3.10
+  - configparser
+  - pathlib
+  - ftplib
+  - numpy
