@@ -1,4 +1,4 @@
-name: Python-FTP-Client
+name: Python-FTP-AutoUpdater
 
 dependencies:
   - python=3.10
