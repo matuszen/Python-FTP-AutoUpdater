@@ -1,8 +1,0 @@
-name: Python-FTP-AutoUpdater
-
-dependencies:
-  - python=3.10
-  - configparser
-  - pathlib
-  - ftplib
-  - numpy
