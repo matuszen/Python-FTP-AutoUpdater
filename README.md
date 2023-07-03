@@ -74,7 +74,7 @@ sudo nano /etc/vsftpd.conf
 sudo service vsftpd restart
 ```
 
-## Settings in /etc/vsftpd.conf
+### Settings in /etc/vsftpd.conf
 
 ```shell
 listen=NO
