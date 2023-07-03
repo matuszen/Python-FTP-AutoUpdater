@@ -2,6 +2,7 @@ from datetime import datetime
 from pathlib import Path
 from ftplib import FTP
 import numpy as np
+import sys
 import os
 
 
@@ -12,46 +13,47 @@ def log(messege: str, show_hour: bool = True) -> None:
     ----------
     messege : str
         messege, to be printed
-    showHour : bool, optional
+    show_hour : bool, optional
         determines whether to print a current hour, by default True"""
 
     if show_hour:
-        time = datetime.now().strftime('%H:%M:%S')
-        print(f'[{time}] {messege}')
+        time = datetime.now().strftime("%H:%M:%S")
+        sys.stdout.write(f"[{time}] {messege}")
     else:
-        print(messege)
+        sys.stdout.write(messege)
 
 
 def validate_tuple(element: str, elements_type: type = str) -> tuple:
     if elements_type == str:
         elements_type = lambda x: str(x)
-    
+
     elif elements_type == int:
         elements_type = lambda x: int(x)
-    
+
     elif elements_type == float:
         elements_type = lambda x: float(x)
-    
-    element = element.replace(' ', '')
 
-    if element == '()' or len(element) == 0:
+    element = element.replace(" ", "")
+
+    if element == "()" or len(element) == 0:
         return tuple()
-    
-    elif element[0] == '(' and element[-1]  == ')':
-        new_element = element[1:-1].split(',')
-        for i in range(len(new_element)): new_element[i] = elements_type(new_element[i])
+
+    elif element[0] == "(" and element[-1] == ")":
+        new_element = element[1:-1].split(",")
+        for i in range(len(new_element)):
+            new_element[i] = elements_type(new_element[i])
         return tuple(new_element)
-    
+
     else:
-        new_element = element.split(',')
-        for i in range(len(new_element)): new_element[i] = elements_type(new_element[i])
+        new_element = element.split(",")
+        for i in range(len(new_element)):
+            new_element[i] = elements_type(new_element[i])
         return tuple(new_element)
 
 
 class FTPconn:
-
     def __init__(self, host: str, login: str, password: str, port: int = 21) -> None:
-        """ Initializes an FTP connection to the specified host, using the specified login credentials
+        """Initializes an FTP connection to the specified host, using the specified login credentials
 
         Parameters
         ----------
@@ -64,18 +66,19 @@ class FTPconn:
         port : int, optional
             The port number to use for the FTP connection, by default 21"""
 
-        self.host, self.login, password, password_hash, self.port = self._validate_data(host, login, password, port)
+        self.host, self.login, password, password_hash, self.port = self._validate_data(
+            host, login, password, port
+        )
 
-        log('Starting connection')
-        log(f'Host: {host}')
+        log("Starting connection")
+        log(f"Host: {host}")
 
         self.conn = self._use_FTP(password, password_hash)
 
         self._check_path_styles()
 
-        password = password_hash = ''
+        password = password_hash = ""
         del password, password_hash
-
 
     def _validate_data(self, host: str, login: str, password: str, port: int) -> tuple:
         """Validates the input parameters and returns them as a tuple
@@ -101,44 +104,49 @@ class FTPconn:
         ValueError
             If `host` is an empty string or consists only of whitespace characters"""
 
-        port = int(port) if port != 'default' else 21
+        port = int(port) if port != "default" else 21
 
         password_hash = "*" * len(password)
 
         if not host.strip():
             log("Wrong parameters")
-            raise ValueError('Invalid host address provided in `config.ini`')
+            raise ValueError("Invalid host address provided in `config.ini`")
 
         if not isinstance(login, str):
             login = str(login)
-        
+
         elif not isinstance(password, str):
             password = str(password)
-        
-        return host, login, password, password_hash, port
 
+        return host, login, password, password_hash, port
 
     def check_main_directory(self) -> None:
         try:
             self.nlst().index(self.main_directory)
         except ValueError:
             self.mkdir(self.main_directory)
-    
 
-    def validate_directories(self, source_direction: str, destination_direction: str) -> tuple:
-        if source_direction.find(self.remote_path_slash) != -1 or destination_direction.find(self.local_path_slash) != -1:
+    def validate_directories(
+        self, source_direction: str, destination_direction: str
+    ) -> tuple:
+        if (
+            source_direction.find(self.remote_path_slash) != -1
+            or destination_direction.find(self.local_path_slash) != -1
+        ):
+            source_direction = source_direction.replace(
+                self.remote_path_slash, self.local_path_slash
+            )
+            destination_direction = destination_direction.replace(
+                self.local_path_slash, self.remote_path_slash
+            )
 
-            source_direction = source_direction.replace(self.remote_path_slash, self.local_path_slash)
-            destination_direction = destination_direction.replace(self.local_path_slash, self.remote_path_slash)
-        
         while source_direction[-1] == self.local_path_slash:
             source_direction = source_direction[0:-1]
-        
+
         while destination_direction[-1] == self.remote_path_slash:
             destination_direction = destination_direction[0:-1]
-        
-        return source_direction, destination_direction
 
+        return source_direction, destination_direction
 
     def _use_FTP(self, password: str, password_hash: str) -> FTP:
         """Connects to an FTP server using the specified host, port, login, password, and encoding
@@ -156,38 +164,39 @@ class FTPconn:
 
         try:
             ftp = FTP()
-            ftp.encoding = 'UTF-8'
+            ftp.encoding = "UTF-8"
 
-            log('Protocole: FTP')
-            log(f'Port: {self.port}')
-            log(f'Encoding: {ftp.encoding}')
+            log("Protocole: FTP")
+            log(f"Port: {self.port}")
+            log(f"Encoding: {ftp.encoding}")
 
             ftp.connect(self.host, self.port)
 
         except Exception as e:
-            log(f'{str(e)}\n')
+            log(f"{str(e)}\n")
             raise
 
         else:
-            log(f'Succesfully connected to {self.host}')
-        
+            log(f"Succesfully connected to {self.host}")
+
         try:
-            log(f'User: {self.login}')
-            log(f'Password: {password_hash}')
+            log(f"User: {self.login}")
+            log(f"Password: {password_hash}")
             ftp.login(self.login, password)
 
         except Exception as e:
-            log(f'{str(e)}\n')
+            log(f"{str(e)}\n")
             raise
 
         else:
-            log(f'Succesfully logged into {self.login}')
+            log(f"Succesfully logged into {self.login}")
             log(ftp.getwelcome())
 
         return ftp
-    
 
-    def cd(self, path: str, remote_path_only: bool = False, send_command_only: bool = False) -> None:
+    def cd(
+        self, path: str, remote_path_only: bool = False, send_command_only: bool = False
+    ) -> None:
         """Change the current working directory on the FTP server and/or on the local machine
 
         Parameters
@@ -199,18 +208,18 @@ class FTPconn:
         send_command_only : bool, optional
             If True, send the change directory command to the FTP server, but do not change the local or remote working directory.
             Default is False"""
-        
+
         if remote_path_only:
             try:
                 self.conn.cwd(path)
 
             except:
-                log(f'Failed to change directory to {path}')
+                log(f"Failed to change directory to {path}")
 
             else:
-                new_remote_path = f'{self.remote_path}{self.remote_path_slash}{path}'
+                new_remote_path = f"{self.remote_path}{self.remote_path_slash}{path}"
 
-                log(f'Change directory to {new_remote_path}')
+                log(f"Change directory to {new_remote_path}")
 
                 self.remote_path = new_remote_path
 
@@ -224,68 +233,61 @@ class FTPconn:
                 os.chdir(path)
 
             except:
-                log(f'Failed to change directory to {path}')
+                log(f"Failed to change directory to {path}")
 
             else:
-                new_local_path = f'{str(self.local_path)}{self.local_path_slash}{path}'
-                new_remote_path = f'{self.remote_path}{self.remote_path_slash}{path}'
+                new_local_path = f"{str(self.local_path)}{self.local_path_slash}{path}"
+                new_remote_path = f"{self.remote_path}{self.remote_path_slash}{path}"
 
-                log(f'Change directory to {new_remote_path}')
+                log(f"Change directory to {new_remote_path}")
 
                 self.remote_path = new_remote_path
                 self.local_path = new_local_path
-    
 
     def cwd(self) -> str:
         """Return current working directory"""
 
         return self.conn.pwd()
 
-
     def nlst(self) -> list:
         """Return a list of files in a given directory"""
 
         return self.conn.nlst()
 
-
     def mkdir(self, directory_name: str) -> None:
         """Make a directory in current working directory
-        
+
         Parameters
         ----------
         directory_name : str
             the name of the directory to be created"""
-        
-        self.conn.mkd(directory_name)
 
+        self.conn.mkd(directory_name)
 
     def rmdir(self, directory_name: str) -> None:
         """Remove a directory in current working directory
-        
+
         Parameters
         ----------
         directory_name : str
             the name of the directory to be removed"""
-        
-        self.conn.rmd(directory_name)
 
+        self.conn.rmd(directory_name)
 
     def delete(self, file_name: str) -> None:
         """Remove a file in current working directory
-        
+
         Parameters
         ----------
         file_name : str
             the name of the file to be removed"""
-        
+
         self.conn.delete(file_name)
 
-    
     def close(self) -> None:
         """Quit and close the connection"""
 
         self.conn.quit()
-    
 
     def set_disabled_elements(self, disabled_elements: tuple) -> None:
         """Set the disabled elements to be used during uploading files
@@ -294,11 +296,12 @@ class FTPconn:
         ----------
         disabled_elements : tuple of str
             Representing the names od disabled elements"""
-        
-        self.disabled_elements = disabled_elements
-    
 
-    def set_paths(self, local_path: str, remote_path: str, main_path: str, main_directory: str) -> None:
+        self.disabled_elements = disabled_elements
+
+    def set_paths(
+        self, local_path: str, remote_path: str, main_path: str, main_directory: str
+    ) -> None:
         """Set local and remote paths for FTP connection.
 
         Parameters:
@@ -316,70 +319,67 @@ class FTPconn:
             Main path to the directory containing the files to be uploaded
         main_directory : str
             Main directory containing the files to be uploaded"""
-        
+
         self.local_path = local_path
         self.remote_path = remote_path
         self.main_path = main_path
         self.main_directory = main_directory
 
-    
     def _check_path_styles(self) -> None:
         """Check the style of the remote and local paths"""
 
         self._check_remote_path_style()
         self._check_local_path_style()
 
-    
     def _check_remote_path_style(self) -> None:
         """Check the style of the path used by the remote file system and set the `remote_path_style` and `remote_path_slash` attributes accordingly
 
-        If the remote system is identified as running Windows, the `remote_path_style` attribute is set to `'NT'` and the `remote_path_slash` attribute is set to `'\\'`. If the remote system is identified as running a Unix-like system, the `remote_path_style` attribute is set to `'Posix'` and the `remote_path_slash` attribute is set to `'/'`. Otherwise, the `remote_path_style` attribute is set to `'Unknown'` and the `remote_path_slash` attribute is set to an empty string"""
+        If the remote system is identified as running Windows, the `remote_path_style` attribute is set to `'NT'` and the `remote_path_slash` attribute is set to `'\\'`. If the remote system is identified as running a Unix-like system, the `remote_path_style` attribute is set to `'Posix'` and the `remote_path_slash` attribute is set to `'/'`. Otherwise, the `remote_path_style` attribute is set to `'Unknown'` and the `remote_path_slash` attribute is set to an empty string
+        """
 
         try:
-            response = self.conn.sendcmd('SYST')
+            response = self.conn.sendcmd("SYST")
             tokens = response.split()
 
             if len(tokens) > 1:
                 system_type = tokens[1].upper()
 
-                if system_type.startswith('WIN'):
-                    self.remote_path_style = 'NT'
-                    self.remote_path_slash = '\\'
-                
-                elif system_type.startswith('UNIX'):
-                    self.remote_path_style = 'Posix'
-                    self.remote_path_slash = '/'
-                
+                if system_type.startswith("WIN"):
+                    self.remote_path_style = "NT"
+                    self.remote_path_slash = "\\"
+
+                elif system_type.startswith("UNIX"):
+                    self.remote_path_style = "Posix"
+                    self.remote_path_slash = "/"
+
                 else:
-                    self.remote_path_style = 'Unknown'
-                    self.remote_path_slash = ''
+                    self.remote_path_style = "Unknown"
+                    self.remote_path_slash = ""
 
         except:
-            self.remote_path_style = 'Unknown'
-            self.remote_path_slash = ''
-    
+            self.remote_path_style = "Unknown"
+            self.remote_path_slash = ""
 
     def _check_local_path_style(self) -> None:
         """Checks the local path style based on the operating system type. It sets the `local_path_style` attribute to the corresponding path style string (`'Posix'` or `'NT'`) and sets the `local_path_slash` attribute to the appropriate path separator. If the operating system is not recognized, it sets `local_path_style` to `'Unknown'` and `local_path_slash` to an empty string"""
 
         try:
-            if os.name.lower() == 'posix':
-                self.local_path_style = 'Posix'
-                self.local_path_slash = '/'
+            if os.name.lower() == "posix":
+                self.local_path_style = "Posix"
+                self.local_path_slash = "/"
 
-            elif os.name.lower() == 'nt':
-                self.local_path_style = 'NT'
-                self.local_path_slash = '\\'
+            elif os.name.lower() == "nt":
+                self.local_path_style = "NT"
+                self.local_path_slash = "\\"
 
             else:
-                self.local_path_style = 'Unknown'
-                self.local_path_slash = ''
+                self.local_path_style = "Unknown"
+                self.local_path_slash = ""
 
         except:
-            self.local_path_style = 'Unknown'
-            self.local_path_slash = ''
+            self.local_path_style = "Unknown"
+            self.local_path_slash = ""
 
-    
     def check_file_structure(self) -> None:
         """Checks the file structure between the local and remote directories. If the local directory
         contains more folders, it attempts to change the remote directory to match the local folder
@@ -387,7 +387,9 @@ class FTPconn:
         it will move up one level until it reaches a directory that matches the local folder structure.
         Recursively calls itself for every local folder found"""
 
-        local_folders, local_files = self._analyze_local_directory(os.listdir(self.local_path))
+        local_folders, local_files = self._analyze_local_directory(
+            os.listdir(self.local_path)
+        )
 
         self._check_directory(local_folders, local_files)
 
@@ -396,29 +398,34 @@ class FTPconn:
 
         else:
             for folder in local_folders:
-
-                while not Path.exists(Path(f'{self.local_path}{self.local_path_slash}{folder}')):
+                while not Path.exists(
+                    Path(f"{self.local_path}{self.local_path_slash}{folder}")
+                ):
                     self._up_direction()
 
                 self.cd(folder)
 
                 self.check_file_structure()
 
-
     def _up_direction(self) -> None:
         """Changing current working direction one level higher in file structure. Do this both on server, and on user comp"""
 
-        local_path = self.local_path_slash.join(self.local_path.split(self.local_path_slash)[:-1])
-        remote_path = self.remote_path_slash.join(self.remote_path.split(self.remote_path_slash)[:-1])
-        
+        local_path = self.local_path_slash.join(
+            self.local_path.split(self.local_path_slash)[:-1]
+        )
+        remote_path = self.remote_path_slash.join(
+            self.remote_path.split(self.remote_path_slash)[:-1]
+        )
+
         os.chdir(local_path)
-        self.cd(remote_path, send_command_only = True)
+        self.cd(remote_path, send_command_only=True)
 
         self.local_path = local_path
         self.remote_path = remote_path
 
-
-    def _check_directory(self, local_folders: np.ndarray, local_files: np.ndarray) -> None:
+    def _check_directory(
+        self, local_folders: np.ndarray, local_files: np.ndarray
+    ) -> None:
         """Check the directory structure on the host and local system and synchronize them
 
         Parameters
@@ -427,7 +434,7 @@ class FTPconn:
             An array of the folders in the local directory
         local_files : array of str
             An array of the files in the local directory"""
-        
+
         self._create_folders(local_folders)
         self._upload_files(local_files)
 
@@ -439,7 +446,6 @@ class FTPconn:
         if not np.array_equal(host_folders, local_folders):
             self._check_folders(host_folders, local_folders)
 
-
     def _create_folders(self, folders: np.ndarray) -> None:
         """Create folders on the remote host
 
@@ -447,15 +453,14 @@ class FTPconn:
         ----------
         folders : array of str
             An array of folder names to be created"""
-        
+
         for folder in folders:
             try:
                 self.mkdir(folder)
             except:
-                log(f'Directory {folder} already exists')
+                log(f"Directory {folder} already exists")
             else:
-                log(f'Create {folder} folder')
-
+                log(f"Create {folder} folder")
 
     def _upload_files(self, files: np.ndarray) -> None:
         """Uploads given files to the remote server. If a file with the same name already exists on the server, it is replaced
@@ -464,17 +469,16 @@ class FTPconn:
         ----------
         files : array of str
             An array of file names (with extensions) to be uploaded"""
-        
+
         for file in files:
             try:
                 self._send_file(file)
             except:
                 self.delete(file)
                 self._send_file(file)
-                log(f'Replaced {file}')
+                log(f"Replaced {file}")
             else:
-                log(f'Upload {file}')
-
+                log(f"Upload {file}")
 
     def _send_file(self, file_name: str) -> None:
         """Uploads a file from the local directory to the remote FTP server
@@ -483,10 +487,9 @@ class FTPconn:
         ----------
         file_name : str
             The name of the file to be uploaded"""
-            
-        with open(f'{self.local_path}{self.local_path_slash}{file_name}', 'rb') as file:
-            self.conn.storbinary(f'STOR {file_name}', file)
 
+        with open(f"{self.local_path}{self.local_path_slash}{file_name}", "rb") as file:
+            self.conn.storbinary(f"STOR {file_name}", file)
 
     def _check_files(self, files_on_host: np.ndarray, local_files: np.ndarray) -> None:
         """This method checks the files on the remote host and deletes any files that do not exist locally
@@ -497,16 +500,17 @@ class FTPconn:
             An array containing the names of the files on the remote host
         local_files : array of str
              An array containing the names of the files locally"""
-        
+
         for file in files_on_host:
             if file not in local_files:
                 self.delete(file)
-                log(f'Delete {file}')
+                log(f"Delete {file}")
 
-
-    def _check_folders(self, folders_on_host: np.ndarray, local_folders: np.ndarray) -> None:
-        """Searches through folders on the remote host and compares them with local folders. If a folder is found on the host 
-        that is not in the local folder, the method changes the current working directory to that folder and recursively 
+    def _check_folders(
+        self, folders_on_host: np.ndarray, local_folders: np.ndarray
+    ) -> None:
+        """Searches through folders on the remote host and compares them with local folders. If a folder is found on the host
+        that is not in the local folder, the method changes the current working directory to that folder and recursively
         deletes its contents
 
         Parameters
@@ -521,7 +525,6 @@ class FTPconn:
                 self.cd(folder)
                 self.clear_file_structure()
 
-
     def _is_directory(self, element_name: str) -> bool:
         """Checks if a given element on the remote server is a directory
 
@@ -534,50 +537,47 @@ class FTPconn:
         -------
         bool
             True if element is a directory, otherwise False"""
-        
+
         current_directory = self.remote_path
 
         try:
-            self.cd(element_name, send_command_only = True)
-            self.cd(current_directory, send_command_only = True)
+            self.cd(element_name, send_command_only=True)
+            self.cd(current_directory, send_command_only=True)
             return True
 
         except:
             return False
 
-
     def _analyze_local_directory(self, directory_elements: list) -> tuple:
-
         array_length = len(directory_elements)
 
         if array_length == 0:
             return [], []
-        
-        max_element_length = len(max(directory_elements, key = len))
+
+        max_element_length = len(max(directory_elements, key=len))
         # local_folders = np.array([], dtype = str)
         # local_files = np.array([], dtype = str)
-        local_folders = np.empty(array_length, dtype = f'U{max_element_length}')
-        local_files = np.empty(array_length, dtype = f'U{max_element_length}')
+        local_folders = np.empty(array_length, dtype=f"U{max_element_length}")
+        local_files = np.empty(array_length, dtype=f"U{max_element_length}")
 
         for element in directory_elements:
-
             if element not in self.disabled_elements:
-        
-                element_path = Path(f'{self.local_path}{self.local_path_slash}{element}')
+                element_path = Path(
+                    f"{self.local_path}{self.local_path_slash}{element}"
+                )
 
                 if element_path.is_dir():
                     # local_folders = np.append(local_folders, element)
-                    local_folders[np.where(local_folders == '')[0][0]] = element
+                    local_folders[np.where(local_folders == "")[0][0]] = element
 
                 else:
                     # local_files = np.append(local_files, element)
-                    local_files[np.where(local_files == '')[0][0]] = element
-        
-        local_files = np.delete(local_files, np.where(local_files == '')[0])
-        local_folders = np.delete(local_folders, np.where(local_folders == '')[0])
-        
+                    local_files[np.where(local_files == "")[0][0]] = element
+
+        local_files = np.delete(local_files, np.where(local_files == "")[0])
+        local_folders = np.delete(local_folders, np.where(local_folders == "")[0])
+
         return local_folders, local_files
-    
 
     def _analyze_host_directory(self) -> tuple:
         """Analyze the contents of the current directory on an FTP server
@@ -593,50 +593,49 @@ class FTPconn:
 
         if array_length == 0:
             return [], []
-        
-        max_element_length = len(max(directory_elements, key = len))
+
+        max_element_length = len(max(directory_elements, key=len))
 
         # remote_folders = np.array([], dtype = str)
-        remote_folders = np.empty(array_length, dtype = f'U{max_element_length}')
+        remote_folders = np.empty(array_length, dtype=f"U{max_element_length}")
         # remote_files = np.array([], dtype = str)
-        remote_files = np.empty(array_length, dtype = f'U{max_element_length}')
+        remote_files = np.empty(array_length, dtype=f"U{max_element_length}")
 
         for element in directory_elements:
-                
-            if element in ('.', '..'):
+            if element in (".", ".."):
                 continue
 
             elif self._is_directory(element):
                 if element not in self.disabled_elements:
-                    remote_folders[np.where(remote_folders == '')[0][0]] = element
+                    remote_folders[np.where(remote_folders == "")[0][0]] = element
                     # remote_folders: np.ndarray = np.append(remote_folders, element)
 
             else:
                 if element not in self.disabled_elements:
-                    remote_files[np.where(remote_files == '')[0][0]] = element
+                    remote_files[np.where(remote_files == "")[0][0]] = element
                     # remote_files: np.ndarray = np.append(remote_files, element)
 
+        remote_files = np.delete(remote_files, np.where(remote_files == "")[0])
+        remote_folders = np.delete(remote_folders, np.where(remote_folders == "")[0])
 
-        remote_files = np.delete(remote_files, np.where(remote_files == '')[0])
-        remote_folders = np.delete(remote_folders, np.where(remote_folders == '')[0])
-        
         return remote_folders, remote_files
-
 
     def clear_file_structure(self) -> None:
         """Recursively searches through the current working directory on the remote server and removes all files and folders"""
-    
 
         remote_folders, remote_files = self._analyze_host_directory()
 
         current_directory = self.remote_path.split(self.remote_path_slash)[-1]
 
-        if self.remote_path == self.main_path and len((remote_files, remote_folders)) == 0:
+        if (
+            self.remote_path == self.main_path
+            and len((remote_files, remote_folders)) == 0
+        ):
             return
-        
+
         if len(remote_files) != 0:
             self._remove_files(remote_files)
-        
+
         if len(remote_folders) == 0:
             self._up_direction()
             self._delete_main_directory(current_directory)
@@ -649,7 +648,6 @@ class FTPconn:
         self._up_direction()
 
         self._delete_main_directory(current_directory)
-
 
     def _delete_main_directory(self, directory_name: list) -> None:
         """Delete the main directory on the FTP server
@@ -665,10 +663,9 @@ class FTPconn:
         -------
         FTP
             FTP connection instance after the main directory has been deleted"""
-        
-        self.rmdir(directory_name)
-        log(f'Delete {directory_name}')
 
+        self.rmdir(directory_name)
+        log(f"Delete {directory_name}")
 
     def _remove_files(self, files: list) -> None:
         """Remove files, in current working directory on server, which are listed in files param
@@ -683,16 +680,18 @@ class FTPconn:
         Returns
         -------
         FTP
-            the object containing the entire connection to the server. Create by ftplib"""
+            the object containing the entire connection to the server. Create by ftplib
+        """
 
         for file in files:
             try:
                 self.delete(file)
-                log(f'Delete {file}')
+                log(f"Delete {file}")
             except:
-                log(f'Failed to delete {self.remote_path}{self.remote_path_slash}{file}')
+                log(
+                    f"Failed to delete {self.remote_path}{self.remote_path_slash}{file}"
+                )
                 raise
-
 
     def create_file_structure(self) -> None:
         """This function creates a directory structure on an FTP server based on the local directory structure. If a directory or file already exists on the server, it will not be created again. The disabledElements parameter is a tuple containing the names of any files or folders that should be excluded from the upload
@@ -719,15 +718,15 @@ class FTPconn:
 
         else:
             for folder in folders:
-
-                while not Path.exists(Path(f'{self.local_path}{self.local_path_slash}{folder}')):
+                while not Path.exists(
+                    Path(f"{self.local_path}{self.local_path_slash}{folder}")
+                ):
                     self._up_direction()
 
                 self.cd(folder)
                 # os.chdir(Path(f'{Path.cwd()}\\{folder}'))
 
                 self.create_file_structure()
-
 
     def _create_directory(self, folders: np.ndarray, files: np.ndarray) -> None:
         """Create folders and files in current working directory on server
@@ -742,7 +741,8 @@ class FTPconn:
         Returns
         -------
         FTP
-            the object containing the entire connection to the server. Create by ftplib"""
+            the object containing the entire connection to the server. Create by ftplib
+        """
 
         self._create_folders(folders)
         self._upload_files(files)

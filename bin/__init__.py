@@ -1,6 +1,6 @@
 from configparser import ConfigParser
-from time import time
 from bin.utility import *
+from time import time
 
 
 def main():
