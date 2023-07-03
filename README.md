@@ -2,14 +2,26 @@
 
 This project is a script that performs various operations on a remote FTP server based on the configurations provided in the config.ini file.
 
+## Prerequisites
+
+- Python 3.7.x
+- NumPy 1.21.6
+
 ## Installation
 
 To use this project, follow these steps:
 
-- Clone the repository to your local machine.
-- Install the required dependencies by running the following command:
+1. Clone the repository to your local machine.
 
-  pip install -r requirements.txt
+   ```shell
+   git clone https://github.com/matuszen/Python-FTP-File-AutoUpdater.git
+   ```
+
+2. Install the required dependencies by running the following command:
+
+   ```shell
+   pip install -r requirements.txt
+   ```
 
 Configure the `config.ini` file with the appropriate settings for your FTP server and desired operations.
 
@@ -42,45 +54,47 @@ The script uses the `config.ini` file to obtain the necessary configurations. He
 
 - disabled_elements: A comma-separated list of elements (files or directories) that should be excluded from the operations. This option is only applicable for the update and delete program statuses.
 
-## Usage
-
-To run the script, execute the main() function in the \_\_init\_\_.py file.
-
-    python __init__.py
-
 ## To config ftp on host
 
 ### Install vsftpd
 
-    sudo apt-get install vsftpd
+```shell
+sudo apt-get install vsftpd
+```
 
 ### Edit vsftpd.conf
 
-    sudo nano /etc/vsftpd.conf
+```shell
+sudo nano /etc/vsftpd.conf
+```
 
 ### Restart service
 
-    sudo service vsftpd restart
+```shell
+sudo service vsftpd restart
+```
 
 ## Settings in /etc/vsftpd.conf
 
-    listen=NO
-    listen_ipv6=YES
-    anonymous_enable=NO
-    local_enable=YES
-    write_enable=YES
-    dirmessage_enable=YES
-    use_localtime=YES
-    xferlog_enable=YES
-    connect_from_port_20=YES
-    ftpd_banner=Welcome to blah FTP service
-    ls_recurse_enable=YES
-    secure_chroot_dir=/var/run/vsftpd/empty
-    pam_service_name=vsftpd
-    rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
-    rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
-    ssl_enable=NO
-    utf8_filesystem=YES
+```shell
+listen=NO
+listen_ipv6=YES
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+dirmessage_enable=YES
+use_localtime=YES
+xferlog_enable=YES
+connect_from_port_20=YES
+ftpd_banner=Welcome to blah FTP service
+ls_recurse_enable=YES
+secure_chroot_dir=/var/run/vsftpd/empty
+pam_service_name=vsftpd
+rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem
+rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key
+ssl_enable=NO
+utf8_filesystem=YES
+```
 
 All other setting must be comment
 
