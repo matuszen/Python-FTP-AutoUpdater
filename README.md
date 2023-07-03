@@ -4,8 +4,8 @@ This project is a script that performs various operations on a remote FTP server
 
 ## Prerequisites
 
-- Python 3.7.x
-- NumPy 1.21.6
+- Python >= 3.7.x
+- NumPy >= 1.13
 
 ## Installation
 
